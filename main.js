@@ -15,12 +15,24 @@ sleep(3000);
 
 // Pastikan tab "For You" terpilih -- aman diketuk berulang (idempoten,
 // bukan toggle).
-var forYouTab = desc("For You").findOne(3000);
+var forYouTab = desc("For You").visibleToUser(true).findOne(3000);
 if (forYouTab) forYouTab.click();
 sleep(1000);
 
 var session = new Session();
 var running = true;
+
+// Kadang ketukan Share nyasar (post non-standar spt kartu LIVE/event
+// promosi -- terkonfirmasi lewat dump.js 2026-09-22, skrip berakhir di
+// halaman profil/panel komentar, bukan di feed). Tap "For You" LAGI
+// idempoten & aman (bukan back(), yg berisiko keluar app kalau ternyata
+// sudah di feed utama) -- dipakai sbg pemulihan tiap kali 1 video gagal
+// ditangkap, supaya tidak macet berkepanjangan di layar yg salah.
+function recoverToForYouFeed() {
+  var forYou = desc("For You").visibleToUser(true).findOne(1000);
+  if (forYou) forYou.click();
+  sleep(500);
+}
 
 // Jeda "menonton" ACAK (BUKAN tetap) -- server menandai sesi dgn durasi
 // tonton yg terlalu seragam sbg mencurigakan (SessionAnomalyDetector,
@@ -48,7 +60,8 @@ while (running) {
       });
       console.log("Tercatat #" + session.feedPosition + " (" + data.username + "): " + data.videoId);
     } else {
-      console.log("Video dilewati -- videoId tak terbaca.");
+      console.log("Video dilewati -- videoId tak terbaca, coba pulihkan ke feed.");
+      recoverToForYouFeed();
     }
 
     if (session.shouldFlush()) {
