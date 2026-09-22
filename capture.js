@@ -12,6 +12,7 @@ var SHARE_BUTTON_DESC_PREFIX = "Share video.";
 var COPY_LINK_DESC = "Copy link";
 var PROMOTIONAL_LABEL_ID = "fkg";
 var PROMOTIONAL_LABEL_TEXT = "Promotional content";
+var SHORT_LINK_PATTERN = /^https?:\/\/(vm|vt)\.tiktok\.com\//i;
 
 function readEngagementFromDesc(pattern) {
   var node = descMatches(pattern).findOne(1500);
@@ -63,6 +64,39 @@ function readIsAd() {
   return !!(node && node.text() === PROMOTIONAL_LABEL_TEXT);
 }
 
+// "Copy link" TikTok memberi TAUTAN PENDEK (vt.tiktok.com/XXXXX/), server
+// SENGAJA menolak bentuk ini (lihat TikTokVideoIdExtractor.ts di repo
+// fyp-radar -- keputusan S3: server cuma parser murni tanpa I/O, resolusi
+// redirect jadi tanggung jawab agen). Jadi di sinilah tautan pendek harus
+// diubah jadi URL kanonik SEBELUM dikirim.
+//
+// CATATAN JUJUR: saya tidak 100% yakin bentuk PERSIS respons http.get()
+// di AutoJs6 (apakah field akhir url ada di res.url, res.request.url(),
+// atau cuma lewat header Location) -- dicoba 3 cara berurutan, tapi kalau
+// SEMUA gagal, kirim teks galatnya persis spt biasa.
+function resolveCanonicalVideoUrl(link) {
+  if (!SHORT_LINK_PATTERN.test(link)) return link;
+
+  try {
+    var res = http.get(link);
+    if (res.url) {
+      return typeof res.url === "function" ? res.url() : res.url;
+    }
+    if (res.request && res.request.url) {
+      return typeof res.request.url === "function" ? res.request.url() : res.request.url;
+    }
+    if (res.headers && res.headers.get) {
+      var location = res.headers.get("Location");
+      if (location) return location;
+    }
+    console.error("Tautan pendek tak bisa diresolusi (tak ada url akhir di respons): " + link);
+    return link;
+  } catch (e) {
+    console.error("Galat resolusi tautan pendek (" + link + "): " + e);
+    return link;
+  }
+}
+
 // Ketuk Share -> Copy link -> baca clipboard -> tutup sheet kalau masih
 // terbuka. RISIKO DIKETAHUI: TikTok memuat >1 video sekaligus di
 // accessibility tree (video sblm/sesudah yg sedang tampil) -- findOne()
@@ -92,7 +126,8 @@ function captureVideoIdViaShare() {
     sleep(300);
   }
 
-  return link && link.length > 0 ? link : null;
+  if (!link || link.length === 0) return null;
+  return resolveCanonicalVideoUrl(link);
 }
 
 // Balikan: object data 1 impresi (TANPA feedPosition/capturedAt, itu
