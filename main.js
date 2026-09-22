@@ -68,23 +68,19 @@ while (running) {
       running = session.flush();
     }
 
-    // Gulir ke video berikutnya. GANTI TOTAL dari swipe/sentuhan
-    // (2026-09-22) -- 5 percobaan koordinat berbeda semua gagal krn
-    // posisi kartu berita/promosi TIDAK TETAP antar post, jadi tidak ada
-    // zona aman yg pasti scr koordinat. DIKONFIRMASI via scroll_probe.js
-    // langsung di HP: kontainer feed TikTok py scrollForward() lewat aksi
-    // aksesibilitas langsung -- BUKAN simulasi sentuhan sama sekali,
-    // jadi tidak mungkin salah sasaran ke elemen apa pun.
-    var scrollContainer = scrollable(true).findOne(2000);
-    if (scrollContainer) {
-      scrollContainer.scrollForward();
-    } else {
-      // Fallback kalau kontainer scroll tak ketemu (jarang terjadi) --
-      // swipe biasa lbh baik drpd skrip berhenti total.
-      var w = device.width;
-      var h = device.height;
-      swipe(w / 2, h * 0.5, w / 2, h * 0.3, 120);
-    }
+    // Gulir ke video berikutnya. RIWAYAT (2026-09-22): 5 percobaan
+    // koordinat di TENGAH layar semua gagal (posisi kartu berita/promosi
+    // tidak tetap antar post). scrollForward() aksesibilitas dicoba
+    // gantikan swipe sepenuhnya, TAPI dilaporkan malah tambah galat --
+    // ditinggalkan. Sekarang balik ke swipe, TAPI di TEPI KIRI layar
+    // (~6% dari kiri, bukan tengah) -- di semua contoh post bermasalah
+    // sejauh ini, area itu konsisten kosong (kartu berita/kolom ikon/
+    // caption semua cenderung di tengah atau kanan, tak ada yg nempel
+    // ke tepi kiri). Jarak tetap panjang (80%->20%) & cepat (120ms) spy
+    // jelas dikenali sbg gestur gulir.
+    var w = device.width;
+    var h = device.height;
+    swipe(w * 0.06, h * 0.8, w * 0.06, h * 0.2, 120);
     sleep(500);
   } catch (e) {
     console.error("Galat di 1 putaran (dilewati, lanjut jalan): " + e);
