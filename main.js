@@ -68,15 +68,15 @@ while (running) {
       running = session.flush();
     }
 
-    // Gulir ke video berikutnya: swipe dari 75% ke 40% tinggi layar --
-    // BUKAN sampai 20% spt sblm-nya, krn titik akhir yg terlalu dekat ke
-    // atas layar sering kena kartu promosi/banner LIVE-event yg nempel
-    // di bagian atas konten (dilaporkan: swipe malah membuka halaman
-    // kartu itu). Durasi dipercepat jg (200ms) spy lebih tegas sbg
-    // gestur gulir, bukan drag lambat yg bisa disalahartikan sbg tekan.
+    // Gulir ke video berikutnya: swipe dari 75% ke 50% tinggi layar --
+    // dipersempit LAGI dari percobaan sblm-nya (40%), krn 40% ternyata
+    // MASIH kena kartu berita/promosi yg bisa menempel sampai ke tengah
+    // layar (dilaporkan lewat screenshot 2026-09-22, area amannya
+    // sekitar tengah layar). Durasi tetap cepat (200ms) spy tegas sbg
+    // gestur gulir.
     var w = device.width;
     var h = device.height;
-    swipe(w / 2, h * 0.75, w / 2, h * 0.4, 200);
+    swipe(w / 2, h * 0.75, w / 2, h * 0.5, 200);
     sleep(500);
   } catch (e) {
     console.error("Galat di 1 putaran (dilewati, lanjut jalan): " + e);
