@@ -68,19 +68,23 @@ while (running) {
       running = session.flush();
     }
 
-    // Gulir ke video berikutnya. GANTI PENDEKATAN TOTAL (2026-09-22) --
-    // beberapa percobaan sblm-nya (80->20, 75->40, 75->50, 65->50) semua
-    // gagal krn coba MENGHINDARI kartu berita/promosi lewat pemilihan
-    // titik koordinat -- ternyata posisi kartu itu TIDAK TETAP (kadang
-    // di atas, kadang di tengah-bawah, tergantung post), jadi tidak ada
-    // satu zona aman yg pasti. Pendekatan baru: perbesar LAGI jarak
-    // swipe (85% -> 15%, hampir 1 layar penuh) TAPI percepat durasinya
-    // (120ms, sangat cepat) -- gestur sekencang ini seharusnya dikenali
-    // Android sbg FLING/gulir tegas, bukan ketukan, jadi tidak "menembus"
-    // ke elemen apa pun di titik awal/akhirnya, ke mana pun itu jatuh.
-    var w = device.width;
-    var h = device.height;
-    swipe(w / 2, h * 0.50, w / 2, h * 0.30, 120);
+    // Gulir ke video berikutnya. GANTI TOTAL dari swipe/sentuhan
+    // (2026-09-22) -- 5 percobaan koordinat berbeda semua gagal krn
+    // posisi kartu berita/promosi TIDAK TETAP antar post, jadi tidak ada
+    // zona aman yg pasti scr koordinat. DIKONFIRMASI via scroll_probe.js
+    // langsung di HP: kontainer feed TikTok py scrollForward() lewat aksi
+    // aksesibilitas langsung -- BUKAN simulasi sentuhan sama sekali,
+    // jadi tidak mungkin salah sasaran ke elemen apa pun.
+    var scrollContainer = scrollable(true).findOne(2000);
+    if (scrollContainer) {
+      scrollContainer.scrollForward();
+    } else {
+      // Fallback kalau kontainer scroll tak ketemu (jarang terjadi) --
+      // swipe biasa lbh baik drpd skrip berhenti total.
+      var w = device.width;
+      var h = device.height;
+      swipe(w / 2, h * 0.5, w / 2, h * 0.3, 120);
+    }
     sleep(500);
   } catch (e) {
     console.error("Galat di 1 putaran (dilewati, lanjut jalan): " + e);
