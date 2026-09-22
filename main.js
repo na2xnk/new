@@ -68,15 +68,19 @@ while (running) {
       running = session.flush();
     }
 
-    // Gulir ke video berikutnya: swipe dari 65% ke 50% tinggi layar.
-    // Titik AKHIR sblm-nya (40%) sempat diperbaiki ke 50% krn kena kartu
-    // berita/promosi di atas. Titik AWAL (dulu 75%) JUGA dilaporkan
-    // bermasalah -- 75% kena zona caption/tombol "more"/info musik yg
-    // biasanya nempel di bagian bawah konten. Sekarang kedua titik
-    // dirapatkan ke sekitar tengah layar, menjauh dari kedua zona itu.
+    // Gulir ke video berikutnya. GANTI PENDEKATAN TOTAL (2026-09-22) --
+    // beberapa percobaan sblm-nya (80->20, 75->40, 75->50, 65->50) semua
+    // gagal krn coba MENGHINDARI kartu berita/promosi lewat pemilihan
+    // titik koordinat -- ternyata posisi kartu itu TIDAK TETAP (kadang
+    // di atas, kadang di tengah-bawah, tergantung post), jadi tidak ada
+    // satu zona aman yg pasti. Pendekatan baru: perbesar LAGI jarak
+    // swipe (85% -> 15%, hampir 1 layar penuh) TAPI percepat durasinya
+    // (120ms, sangat cepat) -- gestur sekencang ini seharusnya dikenali
+    // Android sbg FLING/gulir tegas, bukan ketukan, jadi tidak "menembus"
+    // ke elemen apa pun di titik awal/akhirnya, ke mana pun itu jatuh.
     var w = device.width;
     var h = device.height;
-    swipe(w / 2, h * 0.65, w / 2, h * 0.5, 200);
+    swipe(w / 2, h * 0.85, w / 2, h * 0.15, 120);
     sleep(500);
   } catch (e) {
     console.error("Galat di 1 putaran (dilewati, lanjut jalan): " + e);
