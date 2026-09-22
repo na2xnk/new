@@ -68,15 +68,15 @@ while (running) {
       running = session.flush();
     }
 
-    // Gulir ke video berikutnya: swipe dari 75% ke 50% tinggi layar --
-    // dipersempit LAGI dari percobaan sblm-nya (40%), krn 40% ternyata
-    // MASIH kena kartu berita/promosi yg bisa menempel sampai ke tengah
-    // layar (dilaporkan lewat screenshot 2026-09-22, area amannya
-    // sekitar tengah layar). Durasi tetap cepat (200ms) spy tegas sbg
-    // gestur gulir.
+    // Gulir ke video berikutnya: swipe dari 65% ke 50% tinggi layar.
+    // Titik AKHIR sblm-nya (40%) sempat diperbaiki ke 50% krn kena kartu
+    // berita/promosi di atas. Titik AWAL (dulu 75%) JUGA dilaporkan
+    // bermasalah -- 75% kena zona caption/tombol "more"/info musik yg
+    // biasanya nempel di bagian bawah konten. Sekarang kedua titik
+    // dirapatkan ke sekitar tengah layar, menjauh dari kedua zona itu.
     var w = device.width;
     var h = device.height;
-    swipe(w / 2, h * 0.75, w / 2, h * 0.5, 200);
+    swipe(w / 2, h * 0.65, w / 2, h * 0.5, 200);
     sleep(500);
   } catch (e) {
     console.error("Galat di 1 putaran (dilewati, lanjut jalan): " + e);
