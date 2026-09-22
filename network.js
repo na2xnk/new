@@ -9,11 +9,10 @@ var config = require("./config.js");
 
 var RETRY_DELAYS_MS = [2000, 5000, 15000]; // 3x percobaan ulang sebelum menyerah utk 1 batch
 
-/**
- * @returns {{ok: true, body: object} | {ok: false, error: string, fatal: boolean}}
- *   fatal=true -- token ditolak (401), tidak ada gunanya mencoba lagi
- *   tanpa token baru; pemanggil HARUS menghentikan skrip.
- */
+// Balikan: { ok: true, body } kalau sukses, ATAU { ok: false, error,
+// fatal } kalau gagal -- fatal=true (mis. token ditolak, 401) berarti
+// tidak ada gunanya mencoba lagi tanpa token baru, pemanggil HARUS
+// menghentikan skrip.
 function postSessionBatch(payload) {
   var url = config.SERVER_URL + "/ingest/sessions";
   var headers = {

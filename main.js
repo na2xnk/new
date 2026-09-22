@@ -22,13 +22,11 @@ sleep(1000);
 var session = new Session();
 var running = true;
 
-/**
- * Jeda "menonton" ACAK (BUKAN tetap) -- server menandai sesi dgn durasi
- * tonton yg terlalu seragam sbg mencurigakan (SessionAnomalyDetector,
- * S3 REQ-305). Rentang 2.5-5.5 detik ASUMSI AWAL, BELUM diverifikasi
- * thd data produksi sungguhan -- boleh disetel ulang stlh lihat hasil
- * nyata.
- */
+// Jeda "menonton" ACAK (BUKAN tetap) -- server menandai sesi dgn durasi
+// tonton yg terlalu seragam sbg mencurigakan (SessionAnomalyDetector,
+// S3 REQ-305). Rentang 2.5-5.5 detik ASUMSI AWAL, BELUM diverifikasi
+// thd data produksi sungguhan -- boleh disetel ulang stlh lihat hasil
+// nyata.
 function randomWatchDelayMs() {
   return 2500 + Math.floor(Math.random() * 3000);
 }

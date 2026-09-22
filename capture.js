@@ -33,7 +33,7 @@ function readUsername() {
 }
 
 function expandCaptionIfTruncated() {
-  // Caption terpotong (berakhiran "…") kalau ada tombol "more" --
+  // Caption terpotong (berakhiran tanda elipsis) kalau ada tombol "more" --
   // tanpa ini, hashtag di bagian akhir caption panjang bisa hilang.
   var moreButton = id("u3h").findOne(500);
   if (moreButton && moreButton.text() === "more") {
@@ -48,7 +48,9 @@ function readCaptionAndHashtags() {
   var raw = node ? node.text() : "";
   // U+FEFF -- karakter kosong tak terlihat yg dipakai TikTok sbg
   // padding caption terpotong, dibuang spy tidak ikut ke hashtag.
-  raw = raw.replace(/﻿/g, "").trim();
+  // Ditulis pakai kode escape unicode (BUKAN karakter mentah) --
+  // karakter tak terlihat gampang hilang/rusak saat disalin lewat HP.
+  raw = raw.replace(new RegExp(String.fromCharCode(65279), "g"), "").trim();
   var hashtags = raw.match(/#[^\s#]+/g) || [];
   return { caption: raw, hashtags: hashtags };
 }
@@ -61,14 +63,12 @@ function readIsAd() {
   return !!(node && node.text() === PROMOTIONAL_LABEL_TEXT);
 }
 
-/**
- * Ketuk Share -> Copy link -> baca clipboard -> tutup sheet kalau
- * masih terbuka. RISIKO DIKETAHUI: TikTok memuat >1 video sekaligus
- * di accessibility tree (video sblm/sesudah yg sedang tampil) --
- * findOne() ambil kecocokan PERTAMA di urutan tree, BELUM diverifikasi
- * itu selalu video yg sedang tampil di layar. Kalau videoId yg
- * tertangkap ternyata dari video yg salah, ini titik yg perlu diperbaiki.
- */
+// Ketuk Share -> Copy link -> baca clipboard -> tutup sheet kalau masih
+// terbuka. RISIKO DIKETAHUI: TikTok memuat >1 video sekaligus di
+// accessibility tree (video sblm/sesudah yg sedang tampil) -- findOne()
+// ambil kecocokan PERTAMA di urutan tree, BELUM diverifikasi itu selalu
+// video yg sedang tampil di layar. Kalau videoId yg tertangkap ternyata
+// dari video yg salah, ini titik yg perlu diperbaiki.
 function captureVideoIdViaShare() {
   var shareButton = descStartsWith(SHARE_BUTTON_DESC_PREFIX).findOne(2000);
   if (!shareButton) return null;
@@ -95,10 +95,8 @@ function captureVideoIdViaShare() {
   return link && link.length > 0 ? link : null;
 }
 
-/**
- * @returns {object|null} data 1 impresi (TANPA feedPosition/capturedAt,
- *   itu tanggung jawab session.js), null kalau videoId gagal didapat.
- */
+// Balikan: object data 1 impresi (TANPA feedPosition/capturedAt, itu
+// tanggung jawab session.js), ATAU null kalau videoId gagal didapat.
 function captureCurrentVideo() {
   var videoId = captureVideoIdViaShare();
   if (!videoId) return null;

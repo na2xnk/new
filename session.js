@@ -56,12 +56,11 @@ Session.prototype.isEmpty = function () {
   return this.impressions.length === 0;
 };
 
-/**
- * Kirim batch saat ini, lalu SELALU mulai sesi baru (apa pun hasilnya)
- * -- kegagalan kirim 1 batch tidak boleh menghentikan seluruh agen,
- * cukup batch itu yg hilang (dicatat lewat toast, bukan diam-diam).
- * @returns {boolean} true kalau boleh lanjut jalan, false kalau harus berhenti (galat fatal, mis. token ditolak).
- */
+// Kirim batch saat ini, lalu SELALU mulai sesi baru (apa pun hasilnya)
+// -- kegagalan kirim 1 batch tidak boleh menghentikan seluruh agen,
+// cukup batch itu yg hilang (dicatat lewat toast, bukan diam-diam).
+// Balikan true = boleh lanjut jalan, false = harus berhenti (galat
+// fatal, mis. token ditolak).
 Session.prototype.flush = function () {
   if (this.isEmpty()) {
     this.reset();
