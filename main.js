@@ -80,7 +80,7 @@ while (running) {
     // ke elemen apa pun di titik awal/akhirnya, ke mana pun itu jatuh.
     var w = device.width;
     var h = device.height;
-    swipe(w / 2, h * 0.85, w / 2, h * 0.15, 120);
+    swipe(w / 2, h * 0.50, w / 2, h * 0.30, 120);
     sleep(500);
   } catch (e) {
     console.error("Galat di 1 putaran (dilewati, lanjut jalan): " + e);
