@@ -23,9 +23,12 @@ function getDeviceToken() {
   var token = store.get("deviceToken", null);
   if (token) return token;
 
-  // dialogs.input() -- dialog blocking, skrip berhenti di sini sampai
-  // user mengisi & menekan OK. Ditanya SEKALI saja (tersimpan setelahnya).
-  var input = dialogs.input("Token perangkat FYP Radar", "Tempel token dari POST /devices/{id}/credentials");
+  // dialogs.rawInput() -- dialog blocking (API lama tapi paling stabil
+  // lintas versi AutoJs/AutoJs6), skrip berhenti di sini sampai user
+  // mengisi & menekan OK. Ditanya SEKALI saja (tersimpan setelahnya).
+  // (dialogs.input() sempat dicoba tapi galat "Failed to call method"
+  // di build AutoJs6 ini -- rawInput() lebih dijamin ada di semua versi.)
+  var input = dialogs.rawInput("Token perangkat FYP Radar -- tempel token dari POST /devices/{id}/credentials:", "");
   if (!input) {
     throw new Error("Token tidak diisi -- skrip dihentikan. Jalankan ulang & isi token utk lanjut.");
   }
