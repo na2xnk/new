@@ -15,7 +15,7 @@ var PROMOTIONAL_LABEL_TEXT = "Promotional content";
 var SHORT_LINK_PATTERN = /^https?:\/\/(vm|vt)\.tiktok\.com\//i;
 
 function readEngagementFromDesc(pattern) {
-  var node = descMatches(pattern).findOne(1500);
+  var node = descMatches(pattern).visibleToUser(true).findOne(1500);
   if (!node) return null;
   var m = pattern.exec(node.desc());
   return m ? m[1] : null;
@@ -24,19 +24,19 @@ function readEngagementFromDesc(pattern) {
 function readSaveCount() {
   // id/fiy (tombol simpan) TIDAK py angka di desc-nya (beda dari
   // like/komentar/share) -- angka ada di node TERPISAH ber-id "fid".
-  var node = id("fid").findOne(1500);
+  var node = id("fid").visibleToUser(true).findOne(1500);
   return node ? node.text() : null;
 }
 
 function readUsername() {
-  var node = id("title").findOne(1500);
+  var node = id("title").visibleToUser(true).findOne(1500);
   return node ? node.text() : "";
 }
 
 function expandCaptionIfTruncated() {
   // Caption terpotong (berakhiran tanda elipsis) kalau ada tombol "more" --
   // tanpa ini, hashtag di bagian akhir caption panjang bisa hilang.
-  var moreButton = id("u3h").findOne(500);
+  var moreButton = id("u3h").visibleToUser(true).findOne(500);
   if (moreButton && moreButton.text() === "more") {
     moreButton.click();
     sleep(300);
@@ -45,7 +45,7 @@ function expandCaptionIfTruncated() {
 
 function readCaptionAndHashtags() {
   expandCaptionIfTruncated();
-  var node = id("desc").findOne(1500);
+  var node = id("desc").visibleToUser(true).findOne(1500);
   var raw = node ? node.text() : "";
   // U+FEFF -- karakter kosong tak terlihat yg dipakai TikTok sbg
   // padding caption terpotong, dibuang spy tidak ikut ke hashtag.
@@ -60,10 +60,17 @@ function readIsAd() {
   // id "fkg" DIPAKAI ULANG utk >1 jenis label ("Creator labeled as
   // AI-generated" JUGA pakai id ini) -- HARUS cek isi teksnya persis,
   // bukan cuma keberadaan id-nya.
-  var node = id(PROMOTIONAL_LABEL_ID).findOne(300);
+  var node = id(PROMOTIONAL_LABEL_ID).visibleToUser(true).findOne(300);
   return !!(node && node.text() === PROMOTIONAL_LABEL_TEXT);
 }
 
+// DIKONFIRMASI lewat dump.js langsung di HP (2026-09-22): TikTok memuat
+// BEBERAPA post sekaligus di accessibility tree yg sama (post sblm/sesudah
+// yg sedang tampil, id spt "e64" DIPAKAI ULANG di ketiganya) -- semua
+// selector di berkas ini SEKARANG dibatasi .visibleToUser(true) supaya
+// cuma ambil elemen yg BENAR-BENAR tampil di layar, bukan kecocokan
+// pertama di urutan tree (yg bisa jadi milik post lain).
+//
 // "Copy link" TikTok memberi TAUTAN PENDEK (vt.tiktok.com/XXXXX/), server
 // SENGAJA menolak bentuk ini (lihat TikTokVideoIdExtractor.ts di repo
 // fyp-radar -- keputusan S3: server cuma parser murni tanpa I/O, resolusi
@@ -91,17 +98,15 @@ function resolveCanonicalVideoUrl(link) {
 }
 
 // Ketuk Share -> Copy link -> baca clipboard -> tutup sheet kalau masih
-// terbuka. RISIKO DIKETAHUI: TikTok memuat >1 video sekaligus di
-// accessibility tree (video sblm/sesudah yg sedang tampil) -- findOne()
-// ambil kecocokan PERTAMA di urutan tree, BELUM diverifikasi itu selalu
-// video yg sedang tampil di layar. Kalau videoId yg tertangkap ternyata
-// dari video yg salah, ini titik yg perlu diperbaiki.
+// terbuka. .visibleToUser(true) di sini mencegah salah ketuk tombol
+// Share milik post lain yg ikut termuat di tree (lihat catatan di atas
+// captureCurrentVideo).
 function captureVideoIdViaShare() {
-  var shareButton = descStartsWith(SHARE_BUTTON_DESC_PREFIX).findOne(2000);
+  var shareButton = descStartsWith(SHARE_BUTTON_DESC_PREFIX).visibleToUser(true).findOne(2000);
   if (!shareButton) return null;
   shareButton.click();
 
-  var copyLink = desc(COPY_LINK_DESC).findOne(3000);
+  var copyLink = desc(COPY_LINK_DESC).visibleToUser(true).findOne(3000);
   if (!copyLink) {
     back(); // coba tutup apa pun yg terbuka drpd dibiarkan nyangkut
     return null;
@@ -114,7 +119,7 @@ function captureVideoIdViaShare() {
   // JANGAN back() membabi-buta -- cek dulu apa sheet-nya masih ada,
   // supaya tidak keluar dari TikTok sendiri kalau sheet sudah tertutup
   // otomatis stlh Copy Link diketuk.
-  if (desc(COPY_LINK_DESC).exists()) {
+  if (desc(COPY_LINK_DESC).visibleToUser(true).exists()) {
     back();
     sleep(300);
   }
