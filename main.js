@@ -68,10 +68,15 @@ while (running) {
       running = session.flush();
     }
 
-    // Gulir ke video berikutnya: swipe dari 80% ke 20% tinggi layar.
+    // Gulir ke video berikutnya: swipe dari 75% ke 40% tinggi layar --
+    // BUKAN sampai 20% spt sblm-nya, krn titik akhir yg terlalu dekat ke
+    // atas layar sering kena kartu promosi/banner LIVE-event yg nempel
+    // di bagian atas konten (dilaporkan: swipe malah membuka halaman
+    // kartu itu). Durasi dipercepat jg (200ms) spy lebih tegas sbg
+    // gestur gulir, bukan drag lambat yg bisa disalahartikan sbg tekan.
     var w = device.width;
     var h = device.height;
-    swipe(w / 2, h * 0.8, w / 2, h * 0.2, 300);
+    swipe(w / 2, h * 0.75, w / 2, h * 0.4, 200);
     sleep(500);
   } catch (e) {
     console.error("Galat di 1 putaran (dilewati, lanjut jalan): " + e);
