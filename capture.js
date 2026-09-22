@@ -70,26 +70,19 @@ function readIsAd() {
 // redirect jadi tanggung jawab agen). Jadi di sinilah tautan pendek harus
 // diubah jadi URL kanonik SEBELUM dikirim.
 //
-// CATATAN JUJUR: saya tidak 100% yakin bentuk PERSIS respons http.get()
-// di AutoJs6 (apakah field akhir url ada di res.url, res.request.url(),
-// atau cuma lewat header Location) -- dicoba 3 cara berurutan, tapi kalau
-// SEMUA gagal, kirim teks galatnya persis spt biasa.
+// DIKONFIRMASI lewat http_probe.js langsung di HP (build AutoJs6 ini):
+// http.get() otomatis mengikuti redirect, res.url ADA isinya tapi berupa
+// objek Java (HttpUrl), bukan string JS -- harus dibungkus String()
+// eksplisit, kalau tidak objeknya sendiri yg lolos (bukan teks URL-nya).
 function resolveCanonicalVideoUrl(link) {
   if (!SHORT_LINK_PATTERN.test(link)) return link;
 
   try {
     var res = http.get(link);
     if (res.url) {
-      return typeof res.url === "function" ? res.url() : res.url;
+      return String(res.url);
     }
-    if (res.request && res.request.url) {
-      return typeof res.request.url === "function" ? res.request.url() : res.request.url;
-    }
-    if (res.headers && res.headers.get) {
-      var location = res.headers.get("Location");
-      if (location) return location;
-    }
-    console.error("Tautan pendek tak bisa diresolusi (tak ada url akhir di respons): " + link);
+    console.error("Tautan pendek tak bisa diresolusi (res.url kosong): " + link);
     return link;
   } catch (e) {
     console.error("Galat resolusi tautan pendek (" + link + "): " + e);
